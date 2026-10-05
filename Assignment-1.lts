@@ -1,0 +1,29 @@
+const N = 3
+range RANGE_FLOORS = 0..N-1
+
+LOCK = 
+	(acquire -> release -> LOCK).
+
+LIFT  = IDLE[0],
+IDLE[f:RANGE_FLOORS] = 
+	(button_pressed_fora[t:RANGE_FLOORS] -> SPOSTATE[f][t]
+	|button_pressed_arrinta[d:RANGE_FLOORS] -> close_door -> SPOSTATE[f][d]
+	|alarm_triggered -> close_door -> EMERGENCY[f]),
+SPOSTATE[st:RANGE_FLOORS][fin:RANGE_FLOORS] = 
+	(when (st == fin) open_door -> IDLE[st]
+	|when (st < fin) move_up -> SPOSTATE[st+1][fin]
+	|when (st > fin) move_down -> SPOSTATE[st-1][fin]
+	|alarm_triggered -> EMERGENCY[st]),
+EMERGENCY[f:RANGE_FLOORS] = 
+	(when (f == 0) open_door -> signal -> IDLE[0]
+	|when (f > 0) move_down -> EMERGENCY[f-1]).
+
+USER = USER_OUTSIDE,
+USER_OUTSIDE = 
+	(button_pressed_fora[t:RANGE_FLOORS] -> open_door -> USER_ENTERING),
+USER_ENTERING = 
+	(acquire -> enter_lift -> button_pressed_arrinta[d:RANGE_FLOORS] -> USER_INSIDE),
+USER_INSIDE = 
+	(open_door -> exit_lift -> release -> USER_OUTSIDE).
+
+||MUTEX_LIFT = ({a,b}::USER || {a,b}::LIFT || {a,b}::LOCK).
