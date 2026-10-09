@@ -1,0 +1,54 @@
+const N = 2
+const M = 3
+const EMPTY = 0
+const FULL = 1
+range FLOORS_RANGE = 0..N
+range MODE = 0..1
+
+LOCK = (acquire -> release -> LOCK).
+
+LIFT = EMPTY[0],
+EMPTY[f:FLOORS_RANGE] =
+	(floor_button_pressed[floor:FLOORS_RANGE] -> MOVING[f][floor][EMPTY]
+	|alarm_triggered -> EMERGENCY[f][EMPTY]),
+MOVING[start:FLOORS_RANGE][finish:FLOORS_RANGE][mode:MODE] =
+	(when (start == finish) open_door -> ON_FLOOR[start]
+	|when (start < finish) move_up -> MOVING[start+1][finish][mode]
+	|when (start > finish) move_down -> MOVING[start-1][finish][mode]
+	|alarm_triggered -> EMERGENCY[start][mode]),
+ON_FLOOR[f:FLOORS_RANGE] = 
+	(enter -> FULL[f]
+	|exit -> ON_FLOOR[f]
+	|close_door -> EMPTY[f]
+	|alarm_triggered -> close_door_emergency -> EMERGENCY[f][EMPTY]),
+FULL[f:FLOORS_RANGE] = 
+	(lift_button_pressed[floor:FLOORS_RANGE] -> close_door -> MOVING[f][floor][FULL]
+	|alarm_triggered -> close_door_emergency -> EMERGENCY[f][FULL]),
+EMERGENCY[start:FLOORS_RANGE][mode:MODE] = 
+	(when (start > 0) move_down -> EMERGENCY[start-1][mode]
+	|when (start == 0 && mode == FULL) open_door_emergency -> signal -> close_door -> EMPTY[0]
+	|when (start == 0 && mode == EMPTY) open_door -> signal -> close_door -> EMPTY[0]).
+
+
+
+USER = CALLING,
+CALLING = 
+	(floor_button_pressed[floor:FLOORS_RANGE] -> WAITING
+	|alarm_triggered -> USER),
+WAITING = 
+	(acquire -> enter -> ON_BOARD
+	|alarm_triggered -> USER),
+ON_BOARD = 
+	(lift_button_pressed[floor:FLOORS_RANGE] -> MOVING
+	|alarm_triggered -> EXIT_EMERGENCY),
+MOVING = 
+	(exit -> release -> USER
+	|alarm_triggered -> EXIT_EMERGENCY),
+EXIT_EMERGENCY = (open_door_emergency -> exit_emergency -> release -> USER).
+
+
+
+
+
+
+
