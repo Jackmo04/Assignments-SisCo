@@ -42,9 +42,9 @@ WAITING =
 	(acquire -> enter -> ON_BOARD
 	|alarm_triggered -> USER),
 ON_BOARD = 
-	(lift_button_pressed[dest:FLOORS_RANGE] -> MOVING
+	(lift_button_pressed[dest:FLOORS_RANGE] -> MOVING_USER
 	|alarm_triggered -> EXIT_EMERGENCY),
-MOVING = 
+MOVING_USER = 
 	(exit -> release -> USER
 	|alarm_triggered -> EXIT_EMERGENCY),
 EXIT_EMERGENCY = (open_door_emergency -> exit_emergency -> release -> USER).
@@ -64,8 +64,8 @@ QUEUE[head:RANGE_QUEUE][tail:RANGE_QUEUE][tot:0..M] =
 // ignorarla e provare a trovare un modo per gestire quando tocca ad un determinato piano :)
 
 
-||USERS = (USER(1, 0) || USER(2, 1) || USER(3, 0)). //vanno rinominate delle azioni per la sincronizzazione!?
-||FLOORS = (FLOOR(0) || FLOOR(1)).
+||USERS = (USER(1, 0) || USER(2, 1) || USER(3, 0)). //vanno rinominate delle azioni per la sincronizzazione!? -> bohhhh
+||FLOORS = (FLOOR(0) || FLOOR(1) || FLOOR(2)).
 
 ||SYSTEM = (LOCK || LIFT || USERS || FLOORS).
 
