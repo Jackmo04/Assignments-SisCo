@@ -1,0 +1,4 @@
+BODY(B = 0) =
+	(getPos[B] -> calc[B] -> update -> BODY).
+
+||SYSTEM = (BODY(1) || BODY(2) || BODY(3)).
